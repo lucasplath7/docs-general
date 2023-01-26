@@ -1,0 +1,75 @@
+OBJECTS
+
+var obj = {
+ a: "hello world",
+ b: 42,
+ c: true
+};
+obj.a; // "hello world"
+obj.b; // 42
+obj.c; // true
+Values & Types | 31
+obj["a"]; // "hello world"
+obj["b"]; // 42
+obj["c"]; // true
+
+bracket notation is also useful if you want to access a
+property/key but the name is stored in another variable, such as:
+var obj = {
+ a: "hello world",
+ b: 42
+};
+var b = "a";
+obj[b]; // "hello world"
+obj["b"]; // 42
+
+ARRAYS and FUNCTIONS
+
+typeof array returns 'object'
+typeof function returns 'function'
+
+but both are subtypes of object
+
+
+BUILT-IN TYPE METHODS
+
+const stringOne = new String('stringOne');
+console.log('typeof: ', typeof stringOne, '---', stringOne);
+
+const stringTwo ='stringTwo';
+console.log('typeof: ', typeof stringTwo, '---', stringTwo);
+console.log(stringOne.toUpperCase(), '  ', stringTwo.toUpperCase())
+
+typeof:  object --- [String: 'stringOne']  <----  If we remove the 'new' keyword above this does not happen
+typeof:  string --- stringTwo
+STRINGONE    STRINGTWO
+
+FUNCTION SCOPES
+
+foo()
+bar()  <----- This will fail because the const isn't hoisted
+
+function foo() {
+  console.log('foo')
+}
+
+const bar = () => {
+  console.log('bar')
+}
+
+CONDITIONALS
+
+Single line if does not require brackets ---> if(a > 10) a = a - 10;
+
+
+THINGS TO TRY
+
+Functions declarations that hoist vs don't hoist
+	function foo(){}
+	const foo = () => {}
+	const foo = function bar() {}
+	
+IIFE's
+
+Function that truly deep copies an object
+
