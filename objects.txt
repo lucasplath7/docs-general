@@ -1,0 +1,108 @@
+JS Object:
+	- Created in literal or constructed form
+		-literal prefferred for object as well as most built-in objects
+	- Built in objects: really just built in functions that can be used as a constructor that returns a newly constructed object of the subtype
+	
+	***null and undefined have no object wrapper form, only their primitive values. By contrast, Date values can only be created with their constructed object form, as they have no literal form counterpart.
+	
+	Property Descriptors:
+		- Object.getOwnPropertyDescriptor( myObject, "a" );
+			-retrieve the property descriptors
+		- Object.defineProperty( myObject, "a", { value: 2, writable: true, configurable: true, enumerable: true} );
+			-create a property while setting its descriptors
+			
+		-Descriptors:
+			- Writable: can the property be modified
+			- Configurable: can we modify the descriptor definition
+				- This is one way, once false, we can no longer configure it back
+				- Also prevents removal of properties with delete operator
+			- Enumerable: Set enumerable to false to keep the property from showing up in such enumerations
+			
+	- Object Constant: by defining a property with writable: false and configurable: false you can essentially make it a constant
+	- Prevent extensions: Object.preventExtensions( myObject );
+		- Object.seal(obj) = can you not add any more properties, but you also cannot reconfigure or delete any existing properties (though you can still modify their values).
+		- Object.freeze(obj) = as above except also makes properties writable: false
+		
+		
+	Accessor Descriptor: when a property is defined to have a getter and/or setter it becomes an accessor descriptor.  'value' and 'writable' become ignored
+		- can use get a() { return this._a_ }, set a(val) {this._a_ = val * 5} 
+		
+	Iterators:
+		common ways to iterate:
+			-map
+			-forEach
+			-reduce
+			-every,some
+			-for(let i in obj/arr) 
+				-iterates values of array
+				-iterates keys of obj
+			-for(let i of arr)
+				-uses built in iterator
+				-can be applied to obj if iterator is defined
+		
+		custom iterator
+			const obj = {
+				keyOne: 'value1',
+				keyTwo: 'value2'
+			}
+
+			Object.defineProperty(
+				obj,
+				Symbol.iterator,
+				{
+					enumerable: false,
+					writable: false,
+					configurable: true,
+					value: function() {
+					var o = this;
+					var idx = 0;
+					var ks = Object.keys( o );
+					return {
+						next: function() {
+						return {
+							value: o[ks[idx++]],
+							done: (idx > ks.length)
+						};
+						}		
+					};
+					}
+				}
+			)
+
+			for (let i of obj) {
+				console.log(i)
+			}
+			
+			OR assign as a property
+				const obj = {
+					key: 'value',
+					[Symbol.iterator]: function() {
+						return {
+							next: function() {
+								...do iterator stuff
+							}
+						}
+					}
+				}
+				
+CLASSES:
+	-Basically there aren't really classes in JS.  Only attempts at pretending there are classes.
+	
+PROTOTYPES:
+
+-What is it:
+	-Simply a reference to another object
+	-Top end of every normal prototype chain is the built-in Object.prototype
+-Shadowing (3 ways it happens/doesn't happen)
+	1. If a property exists higher in the prototype chain and is writable, a new property that shadows it is added directly on sub object
+	2. If exists higher but is read-only then setting the prop directly and shadowing are not allowed
+	3. If propery is found higher and it is a setter, the setter always takes precedence no shadowing occurs
+-Think of 'inheritance' as delegation instead
+-Bar.prototype = Object.create(Foo.prototype) is the best way to prototype link
+	!- Bar.prototype = Foo.prototype doesn’t create a new object for Bar.prototype to be linked to (editing one will impact the other)
+	!- Bar.prototype = new Foo() does in fact create a new object that is duly linked to Foo.prototype as we’d want. But, it used the Foo(..) “constructor call” to do it. If that function has any side effects (such as logging, changing state, registering against other objects, adding data
+properties to this, etc.), those side effects happen
+	*- and Object.setPrototypeOf( Bar.prototype, Foo.prototype ); is the built in alternative
+	- ALSO, Foo.prototype.isPrototypeOf( a ) is the best way to identify if a prototype exists ANYWHERE in the prototype chain of an object
+		-Object.getPrototypeOf( a ); FOR RETRIEVING
+	
