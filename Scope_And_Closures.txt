@@ -8,3 +8,49 @@ Ch4 HOISTING
 
 Ch5 SCOPE CLOSURE
 
+CURRYING
+
+function add(a, b, c) {
+  return a + b + c;
+}
+
+function curryAdd(a) {
+  return function(b) {
+    return function(c) {
+      return a + b + c;
+    }
+  };
+}
+
+const result = curryAdd(1)(2)(3);
+console.log(result)
+
+
+BEFORE WE BEGIN
+
+for (var i=1; i<=5; i++) {
+  setTimeout( function timer(){
+  console.log( i );
+  }, i*1000 );
+ }
+
+LAST TIME:
+  - functions as scope
+  - var, let, const: basically we never use var because of how unintuitive it's hoisting behavior can be.  let and const work in a more tradionally lexical way
+  -functions as their own scope
+    - and iife's as a way of thoroughly encapsulating scope
+      - iife is a function expression rather than declaration so even naming it doesn't pollute the scope
+  - anonymous functions: generally no upside besides berevity
+  - try/catch
+
+  Start at page 41
+
+HOISTING
+
+
+FUNCTION HOISTING:
+  -Try out the examples
+
+CLOSURE
+
+

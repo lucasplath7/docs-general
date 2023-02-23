@@ -1,0 +1,13 @@
+TYPES:
+
+ECMAScript types per the docs:
+	- Undefined
+	- Null
+	- Boolean
+	- String
+	- Number
+	- Object
+	- Symbol
+	
+VALUES:
+	Arrays
