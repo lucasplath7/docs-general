@@ -81,3 +81,67 @@ PRECEDENCE OF HOW THIS IS DETERMINED
 	2. Called with call or apply (or bind)? Use the specified object.
 	3. Called with a context object owning the call? Use that context object.
 	4. Default: undefined in strict mode, global object otherwise.
+	
+	
+	
+	
+'use-strict'
+const publicationMetadata = {
+  name: 'Test Publication',
+  type: 'sql',
+  table: 'Test_Table',
+  columns: ['col1','col2','col3']
+}
+
+const sftpPublicationMetadata = {
+  name: 'Test SFTP Publication',
+  type: 'sftp',
+  table: 'Test_Table',
+  columns: ['col1','col2','col3'],
+  targetFileName: 'file.dat',
+  targetFilePath: '/path/to/file/',
+}
+
+function Publication(pubMetadata) {
+  this.publicationName = pubMetadata.name;
+  this.publicationType = pubMetadata.type;
+  this.table = pubMetadata.table;
+  this.columns = pubMetadata.columns;
+  this.getColumns = function() {console.log(this.columns)}
+  this.setPublicationName = function setPublicationName(name) {
+    this.publicationName = name;
+  };
+  this.getPublicationName = function getPublicationName() {
+    console.log(this.publicationName);
+  };
+}
+
+const newPublication = new Publication(publicationMetadata);
+
+newPublication.getPublicationName();
+newPublication.setPublicationName('New Pub Name');
+newPublication.getPublicationName();
+newPublication.getColumns()
+console.log('\n*********\n')
+
+
+function SFTPPublication(sftpPublicationMetadata) {
+  Publication.call(this, sftpPublicationMetadata);
+  this.targetFileName = sftpPublicationMetadata.targetFileName;
+  this.targetFilePath = sftpPublicationMetadata.targetFilePath;
+}
+
+// Object.assign(SFTPPublication.prototype, Publication.prototype);
+Object.setPrototypeOf(SFTPPublication.prototype, Publication.prototype)
+
+const sftpPublication = new SFTPPublication(sftpPublicationMetadata);
+
+sftpPublication.getPublicationName();
+sftpPublication.setPublicationName('sftp new Pub Name');
+sftpPublication.getPublicationName();
+sftpPublication.getColumns()
+console.log('\n*********\n')
+
+console.log(sftpPublication instanceof SFTPPublication)
+console.log(sftpPublication instanceof Publication)
+console.log(sftpPublication instanceof Object)
