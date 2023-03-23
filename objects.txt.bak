@@ -106,3 +106,24 @@ properties to this, etc.), those side effects happen
 	- ALSO, Foo.prototype.isPrototypeOf( a ) is the best way to identify if a prototype exists ANYWHERE in the prototype chain of an object
 		-Object.getPrototypeOf( a ); FOR RETRIEVING
 	
+BEHAVIOR DELEGATION:
+	-3 key points
+		1. With OLOO style code, state is on the delegators, not on the delegate (ie the object linked to the parent object contains the state as direct properties)
+		2. With class design we name overriden function the same thing to take advantage of polymorphism.  In OLOO we a void this and name things differently to be more specific (easier to reason about) and avoids naming collisions
+		3. The general utility functions onthe parent object in OLOO are still available because the child delegates up the prototype chain for properties not directly on it
+	-simple OLOO pattern
+	
+		const Foo = {
+			init: function init(width, height){
+				this.width = width || 50;
+				this.height = height || 50;
+			},
+			getWidth: function() { return this.width }.
+		}
+		
+		const Bar = Object.create(Foo);
+		
+		Button.showMeasurements = function showMeasurements() {
+			console.log('height: ', this.height);
+			console.log('width: ', this.width);
+		}
