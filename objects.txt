@@ -130,99 +130,90 @@ BEHAVIOR DELEGATION:
 		
 		
 =========================================================
-CODE NOTES TO SHARE
+///////////////////////////////////////////////////////////////////////////
+//REVIEW
+/**
+ * literal vs constructed form
+ * everything in Js is an object - not true my bad
+ * property descriptors can configure things like writable/configurable and make immutable or non enumerable
+ */
 
-// OBJECTS
-// created in literal form (prefferred)
-const objOne = {
-  keyOne: 'valueOne',
-  keyTwo: 'valueTwo',
-  arrOne: [1,2,3],
+// ITERATING PROPERTIES
+const objIterate = {
+  a: 'a',
+  b: 'b',
+  c: 'c',
 }
 
-const arrOneCopy = objOne.arrOne;
-console.log(arrOneCopy);
-arrOneCopy.push(4);
-console.log(objOne.arrOne);
-
-//Built-in Objects
-// String
-// • Number
-// • Boolean
-// • Object
-// • Function
-// • Array
-// • Date (must be created with new)
-// • RegExp
-// • Error
-
-const strPrim = 'string';
-const strObj = new String('string')
-console.log(strPrim)
-console.log(typeof strPrim)
-console.log(strObj)
-console.log(typeof strObj)
-
-//Duplicating objects, page 44
-
-//Property descriptors
-const objTwo = {
-  keyOne: 'valueOne',
-  keyTwo: 'valueTwo',
-  arrOne: [1,2,3],
+for(let i in objIterate) {
+  console.log(`${i}: `, objIterate[i])
 }
 
-console.log(Object.getOwnPropertyDescriptor( objTwo, 'keyOne' ));
-console.log(Object.getOwnPropertyDescriptor( objTwo, 'arrOne' ));
+Object.keys(objIterate).forEach(key => console.log(`${key}: `, objIterate[key]))
+
+// for (let i of objIterate) {
+//   console.log(`${i}: `, objIterate[i])
+// }
+
+//
 
 
-//get and set
-const myObject = {
-  // define a getter for `a`
-  get a() {
-  console.log(this._a_)
-  return this._a_;
-  },
-  // define a setter for `a`
-  set a(val) {
-  this._a_ = val * 2;
-  }
+const objLinkedToObjIterate = Object.create(objIterate);
+
+console.log(objLinkedToObjIterate)
+console.log(objLinkedToObjIterate.a)
+
+for (let i in objLinkedToObjIterate) {
+  console.log(`${i}: `, objLinkedToObjIterate[i])
+}
+
+Object.keys(objLinkedToObjIterate).forEach(key => console.log(`${key}: `, objLinkedToObjIterate[key]))
+
+//
+function Foo(name) {
+  this.name = name;
+  // this.whoAmIReally = () => console.log('I AM FOO')
+ }
+
+ Foo.prototype.myName = function() {
+  return this.name;
  };
- 
-myObject.a = 2;
-myObject.a
 
-// custom iterators
-const obj = {
-  keyOne: 'value1',
-  keyTwo: 'value2'
-}
+ function Bar(name,label) {
+  Foo.call( this, name );
+  this.label = label;
+ }
 
-Object.defineProperty(
-  obj,
-  Symbol.iterator,
-  {
-    enumerable: false,
-    writable: false,
-    configurable: true,
-    value: function() {
-    var o = this;
-    var idx = 0;
-    var ks = Object.keys( o );
-    return {
-      next: function() {
-      return {
-        value: o[ks[idx++]] + ' custom',
-        done: (idx > ks.length)
-      };
-      }		
-    };
-    }
-  }
-)
+ Bar.prototype = Object.create( Foo.prototype );
 
-for (let i of obj) {
-  console.log(i)
-}
+ Bar.prototype.myLabel = function() {
+  return this.label;
+ };
+ var a = new Bar( "a", "obj a" );
+ console.log(a.myName()); 
+ console.log(a.myLabel());
 
-console.log(obj)
+ console.log(a instanceof Bar)
+ console.log(a instanceof Foo)
+
+ function Baz(name, label, value) {
+  Bar.call(this, name, label);
+  this.value = value;
+ }
+
+ Baz.prototype = Object.create( Bar.prototype );
+
+ Baz.prototype.myValue = function() {
+  return this.value;
+ }
+
+ let b = new Baz('a', 'obj a', 'value a');
+ console.log(b.myName()); 
+ console.log(b.myLabel());
+ console.log(b.myValue());
+
+ console.log(b instanceof Baz);
+ console.log(b instanceof Bar);
+ console.log(b instanceof Foo);
+
+//  b.whoAmIReally()
