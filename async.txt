@@ -1,125 +1,142 @@
-//============================================================================================
+ex. on p. 24
 
-// spot the bug
-function calculateAverage(arr) {
-  let sum = 0;
-  let count = 0;
+// jobs event loop ex for review
 
-  for (let i = 0; i < arr.length; i++) {
-    if (typeof arr[i] === "number") {
-      sum += arr[i];
-      count++;
-    }
-  }
+console.log( "A" );
+setTimeout( function(){
+ console.log( "B" );
+}, 0 );
+// theoretical "Job API"
+schedule( function(){
+ console.log( "C" );
+ schedule( function(){
+ console.log( "D" );
+ } );
+} );
 
-  return sum / count;
+Callback: the ansync workhorse of js (many apps have been developed with only this as a pattern ie no promises or async/await/try/catch)
+	- that's the reason for discussing
+
+Think about how you would describe what will happen with this code	
+// A
+setTimeout( function(){
+ // C
+}, 1000 );
+// B 
+
+Simple ex. but we've seen a lot more complex. Why do we hear about callback hell or have difficulty reasoning about it
+	- Something analagous is how people refer to multitasking in how our brains think
+	- Going to the grocery store
+		-started an action and while we wait
+		-turn on radio
+		-interrupted by call from mom
+		-encountered an error (forgot wallet at home)
+		-handle error return to fetch it
+	- not multitasking but managing rapid context switching
+		-This should make it easier to have an obvious mental model of async in code but it doesn't really
+	- with our thought process it is like a single threaded event loop in action,but not in planning which is what makes it difficult to reason about in code
+
+example of ordering issues
+analyze this as async, sync, or a mix
+async: a, f, b, c, e, d
+sync: a, b, c, d, e, f
+mixed only c async: a, b, c, e, d, f
+
+doA( function(){
+ doB();
+ doC( function(){
+	doD();
+ } )
+ doE();
+} );
+doF();
+
+
+trust issues
+//works and then turns out it charged someon 5 times
+//retry logic was introduced in 3rd party function
+analytics.trackPurchase( purchaseData, function(){
+ chargeCreditCard();
+ displayThankyouPage();
+} );
+
+//solution
+
+var tracked = false;
+analytics.trackPurchase( purchaseData, function(){
+ if (!tracked) {
+ tracked = true;
+ chargeCreditCard();
+ displayThankyouPage();
+ }
+} );
+
+other potential issues:
+-called to early
+-called too late
+-called too few or too many times
+-swallowed errors
+
+Solutions ex for error handling
+
+SPLIT CALLBACKS
+function success(data) {
+ console.log( data );
 }
 
-
-//============================================================================================
-
-// gates
-// We only want to do something when a dependency has happened
-var a, b;
-function foo(x) {
-  a = x * 2;
-  if (a && b) {
-    baz();
-  }
+function failure(err) {
+ console.error( err );
 }
+ajax( "http://some.url.1", success, failure );
 
-function bar(y) {
-  b = y * 2;
-  if (a && b) {
-    baz();
-  }
+
+ERROR FIRST STYLE
+function response(err,data) {
+ // error?
+ if (err) {
+ console.error( err );
+ }
+ // otherwise, assume success
+ else {
+ console.log( data );
+ }
 }
-
-function baz() {
-  console.log( a + b );
-}
-// ajax(..) is some arbitrary Ajax function given by a library
-ajax( "http://some.url.1", foo );
-ajax( "http://some.url.2", bar )
-
-
-
-
-
-// latches
-// We only want to do something if a dependency hasn't happend yet
-// ex. if not error
-var a;
-function foo(x) {
-  if (!a) {
-    a = x * 2;
-    baz();
-  }
-}
-function bar(x) {
-  if (!a) {
-    a = x / 2;
-    baz();
-  }
-}
-function baz() {
-  console.log( a );
-}
-// ajax(..) is some arbitrary Ajax function given by a library
-ajax( "http://some.url.1", foo );
-ajax( "http://some.url.2", bar );
-
-
-
-
-// cooperative concurency
-
-var res = [];
-// `response(..)` receives array of results from the Ajax call
-function response(data) {
-  // add onto existing `res` array
-  res = res.concat(
-    // make a new transformed array with all
-    // `data` values doubled
-    data.map( function(val){
-      return val * 2;
-    } )
-  );
-}
-// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", response );
-ajax( "http://some.url.2", response );
 
-// VERSUS
+WHAT ABOUT NEVER BEING CALLED
 
-var res = [];
-// `response(..)` receives array of results from the Ajax call
-function response(data) {
-  // let's just do 1000 at a time
-  var chunk = data.splice( 0, 1000 );
-  // add onto existing `res` array
-  res = res.concat(
-  // make a new transformed array with all
-  // `chunk` values doubled
-    chunk.map( function(val){
-      return val * 2;
-    } )
-  );
-  // anything left to process?
-  if (data.length > 0) {
-    // async schedule next batch
-    setTimeout( function() {
-      response( data );
-    }, 0 );
-  }
+function timeoutify(fn,delay) {
+ var intv = setTimeout( function(){
+ intv = null;
+ fn( new Error( "Timeout!" ) );
+ }, delay )
+ ;
+ return function() {
+ // timeout hasn't happened yet?
+ if (intv) {
+ clearTimeout( intv );
+ fn.apply( this, arguments );
+ }
+ };
 }
-// ajax(..) is some arbitrary Ajax function given by a library
-ajax( "http://some.url.1", response );
-ajax( "http://some.url.2", response )
+Here’s how you use it:
+// using "error-first style" callback design
+function foo(err,data) {
+ if (err) {
+ console.error( err );
+ }
+ else {
+ console.log( data );
+ }
+}
+ajax( "http://some.url.1", timeoutify( foo, 500 ) );
 
 
-// SITE TO SITE TEMPLATE POC
 
-// publish npm package
 
-// https://docs.npmjs.com/creating-and-publishing-scoped-public-packages
+?code challenge
+?test repos
+
+- current testing discussion
+	- any issues?
+	- anything to share from dev worth pushing and describing?

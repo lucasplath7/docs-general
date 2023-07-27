@@ -1,186 +1,125 @@
-// INSTEAD OF THIS
-const iterations = 10;
-
-for (let i = 0; i < iterations; i++) {
-  console.log('do something')
-}
-
-// DO THIS
-Array(10).fill().map(() => {
-  console.log('do something this way')
-})
-
 //============================================================================================
 
 // spot the bug
+function calculateAverage(arr) {
+  let sum = 0;
+  let count = 0;
 
-function deepCopy(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-
-const user = {
-  name: 'Tyler',
-  age: 32,
-  created: new Date(),
-}
-
-const copiedUser = deepCopy(user)
-
-// console.log(typeof copiedUser.created)
-// console.log(typeof user.created)
-
-
-// another one
-
-const user = {
-  name: 'Tyler',
-  age: 32,
-  greet() {
-    alert(`Hello, my name is ${this.name}`)
-  },
-  mother: {
-    name: 'Jan',
-    greet() {
-      console.log(`Hello, my name is ${this.mother.name}`)
+  for (let i = 0; i < arr.length; i++) {
+    if (typeof arr[i] === "number") {
+      sum += arr[i];
+      count++;
     }
   }
+
+  return sum / count;
 }
 
-user.mother.greet()
 
 //============================================================================================
-
-// a couple highlights from grammer
-
-// checking type of null
-console.log(typeof null);
-
-//not a number
-const a = 2/'foo';
-console.log(typeof a);
-console.log(a === a);
-console.log(isNaN(a))
-
-var a = new Array( 3 );
-var b = [ undefined, undefined, undefined ];
-var c = [];
-c.length = 3;
-
-a.forEach(i => console.log('for a: ', i))
-b.forEach(i => console.log('for b: ', i))
-c.forEach(i => console.log('for c: ', i))
-
-/**
-"0" == null;                // false
-"0" == undefined;           // false
-"0" == false;               // true -- UH OH!
-"0" == NaN;                 // false
-"0" == 0;                   // true
-"0" == "";                  // false
-false == null;              // false
-false == undefined;         // false
-false == NaN;               // false
-false == 0;                 // true -- UH OH!
-false == "";                // true -- UH OH!
-false == [];                // true -- UH OH!
-false == {};                // false
-"" == null;                 // false
-"" == undefined;            // false
-"" == NaN;                  // false
-"" == 0;                    // true -- UH OH!
-"" == [];                   // true -- UH OH!
-"" == {};                   // false
-0 == null;                  // false
-0 == undefined;             // false
-0 == NaN;                   // false
-0 == [];                    // true -- UH OH!
-0 == {};                    // false
-
-For == one or both values are coerced until the same type
-When comparing to a boolean, however, the boolean is always first evaluated as toNumber(bool)
- */
-// try catch and FINALLY
-
-//============================================================================================
-
-// What is the event loop
-// WAY OVERSIMPLIFIED PSEUDOCODE
-
-// `eventLoop` is an array that acts as a queue
-// (first-in, first-out)
-var eventLoop = [ ];
-var event;
-// keep going "forever"
-while (true) {
-  // perform a "tick"
-  if (eventLoop.length > 0) {
-    // get the next event in the queue
-    event = eventLoop.shift();
-    // now, execute the next event
-    try {
-      event();
-    }
-    catch (err) {
-      reportError(err);
-    }
-  }
-}
-
-// So what's actually happening here?
-const a = () => setTimeout(() => console.log('a'), 1000)
-const b = () => setTimeout(() => console.log('b'), 500)
-
-a()
-b()
-
-//https://www.datainfinities.com/10/event-loop-and-callback-queue-in-javascript
-
-
-// console async behavior
 
 // gates
-
+// We only want to do something when a dependency has happened
 var a, b;
 function foo(x) {
- a = x * 2;
- if (a && b) {
- baz();
- }
+  a = x * 2;
+  if (a && b) {
+    baz();
+  }
 }
+
 function bar(y) {
- b = y * 2;
- if (a && b) {
- baz();
- }
+  b = y * 2;
+  if (a && b) {
+    baz();
+  }
 }
+
 function baz() {
- console.log( a + b );
+  console.log( a + b );
 }
 // ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar )
 
-// latches
 
+
+
+
+// latches
+// We only want to do something if a dependency hasn't happend yet
+// ex. if not error
 var a;
 function foo(x) {
- if (!a) {
- a = x * 2;
- baz();
- }
+  if (!a) {
+    a = x * 2;
+    baz();
+  }
 }
 function bar(x) {
- if (!a) {
- a = x / 2;
- baz();
- }
+  if (!a) {
+    a = x / 2;
+    baz();
+  }
 }
 function baz() {
- console.log( a );
+  console.log( a );
 }
 // ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 
 
-//composition over inheritence
+
+
+// cooperative concurency
+
+var res = [];
+// `response(..)` receives array of results from the Ajax call
+function response(data) {
+  // add onto existing `res` array
+  res = res.concat(
+    // make a new transformed array with all
+    // `data` values doubled
+    data.map( function(val){
+      return val * 2;
+    } )
+  );
+}
+// ajax(..) is some arbitrary Ajax function given by a library
+ajax( "http://some.url.1", response );
+ajax( "http://some.url.2", response );
+
+// VERSUS
+
+var res = [];
+// `response(..)` receives array of results from the Ajax call
+function response(data) {
+  // let's just do 1000 at a time
+  var chunk = data.splice( 0, 1000 );
+  // add onto existing `res` array
+  res = res.concat(
+  // make a new transformed array with all
+  // `chunk` values doubled
+    chunk.map( function(val){
+      return val * 2;
+    } )
+  );
+  // anything left to process?
+  if (data.length > 0) {
+    // async schedule next batch
+    setTimeout( function() {
+      response( data );
+    }, 0 );
+  }
+}
+// ajax(..) is some arbitrary Ajax function given by a library
+ajax( "http://some.url.1", response );
+ajax( "http://some.url.2", response )
+
+
+// SITE TO SITE TEMPLATE POC
+
+// publish npm package
+
+// https://docs.npmjs.com/creating-and-publishing-scoped-public-packages

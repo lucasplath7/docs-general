@@ -1,0 +1,21 @@
+/- Theme colors for chart lines
+	-limited number of selections and added tooltip
+/- Typography for all text throughout
+/- withthemes
+/- establish theme color palette
+X Info dialog
+X fdic spacing/sizing of components
+X animated placeholder (no data) chart for fdic page
+X chip colors (if not handled with theme)
+X 3 sources of each type for news
+	-clean up article text
+? make news responsive for mobile display
+?make fdic responsive for mobile display
+- home page better pic sizing/placement
+?filter non zero fdic codes??
+
+
+-publish swerp as npm
+-publish fdic api as npm
+
+-get site running with ssl
